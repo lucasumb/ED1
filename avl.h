@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <queue>
 using namespace std;
+//Aluno : Lucas de Oliveira Umbelino
 
 void atualizar(struct noBst* no);
 struct noBst* balancear(struct noBst* no);
@@ -88,12 +89,16 @@ void inserir(struct noBst** raiz, int val, int* tamanho) {
         (*tamanho)++;
     }
     else if (val > (*raiz)->val) {
-        inserir( &(*raiz)->dir, val, tamanho);
+        inserir(&(*raiz)->dir, val, tamanho);
         atualizar(*raiz);
+        if ((*raiz)->balanco > 1 || (*raiz)->balanco < -1)
+            (*raiz) = balancear(*raiz);
     }
     else {
         inserir(&(*raiz)->esq, val, tamanho);
         atualizar(*raiz);
+        if ((*raiz)->balanco > 1 || (*raiz)->balanco < -1)
+            (*raiz) = balancear(*raiz);
     }
 }
 
@@ -105,10 +110,12 @@ void inserir(struct noBst** raiz, int val, int* tamanho) {
  **/
 void atualizar(struct noBst* no) {
     (no)->altura = altura(no);
-    if ((no)->esq == NULL)
-        (no)->balanco = (no)->dir->altura;
+    if ((no)->esq == NULL && (no)->dir == NULL)
+        (no)->balanco = 0;
     else if ((no)->dir == NULL)
-        (no)->balanco = (no)->esq->altura;
+        (no)->balanco = -(no)->esq->altura;
+    else if ((no)->esq == NULL)
+        (no)->balanco = (no)->dir->altura;
     else
         (no)->balanco = (no)->dir->altura - (no)->esq->altura;
 }
@@ -125,7 +132,15 @@ void atualizar(struct noBst* no) {
  * para descobrir qual é o caso.
  **/
 struct noBst* balancear(struct noBst* no) {
-    return NULL;
+    
+    if (no->balanco < -1 && no->esq->balanco < 0)
+        return rebalancearEsqEsq(no);
+    else if (no->balanco < -1 && no->esq->balanco > 0)
+        return rebalancearEsqDir(no);
+    else if (no->balanco > 1 && no->dir->balanco > 0)
+        return rebalancearDirDir(no);
+    else
+        return rebalancearDirEsq(no);
 }
 
 /**
@@ -135,7 +150,7 @@ struct noBst* balancear(struct noBst* no) {
  * e essa função deve retornar a nova raiz.
  **/
 struct noBst* rebalancearEsqEsq(struct noBst* no) {
-    return NULL;
+    return rotacaoDireita(no);
 }
 
 /**
@@ -145,7 +160,8 @@ struct noBst* rebalancearEsqEsq(struct noBst* no) {
  * e essa função deve retornar a nova raiz.
  **/
 struct noBst* rebalancearEsqDir(struct noBst* no) {
-    return NULL;
+    no->esq = rotacaoEsquerda(no->esq);
+    return rebalancearEsqEsq(no);
 }
 
 /**
@@ -155,7 +171,7 @@ struct noBst* rebalancearEsqDir(struct noBst* no) {
  * e essa função deve retornar a nova raiz.
  **/
 struct noBst* rebalancearDirDir(struct noBst* no) {
-    return NULL;
+    return rotacaoEsquerda(no);
 }
 
 /**
@@ -165,7 +181,8 @@ struct noBst* rebalancearDirDir(struct noBst* no) {
  * e essa função deve retornar a nova raiz.
  **/
 struct noBst* rebalancearDirEsq(struct noBst* no) {
-    return NULL;
+    no->dir = rotacaoDireita(no->dir);
+    return rebalancearDirDir(no);
 }
 
 /**
