@@ -91,13 +91,13 @@ void inserir(struct noBst** raiz, int val, int* tamanho) {
     else if (val > (*raiz)->val) {
         inserir(&(*raiz)->dir, val, tamanho);
         atualizar(*raiz);
-        if ((*raiz)->balanco > 1 || (*raiz)->balanco < -1)
+        if ((*raiz)->balanco == 2 || (*raiz)->balanco == -2)
             (*raiz) = balancear(*raiz);
     }
     else {
         inserir(&(*raiz)->esq, val, tamanho);
         atualizar(*raiz);
-        if ((*raiz)->balanco > 1 || (*raiz)->balanco < -1)
+        if ((*raiz)->balanco == 2 || (*raiz)->balanco == -2)
             (*raiz) = balancear(*raiz);
     }
 }
@@ -132,15 +132,17 @@ void atualizar(struct noBst* no) {
  * para descobrir qual é o caso.
  **/
 struct noBst* balancear(struct noBst* no) {
-    
-    if (no->balanco < -1 && no->esq->balanco < 0)
+
+    if (no->balanco == -2 && no->esq->balanco == -1)
         return rebalancearEsqEsq(no);
-    else if (no->balanco < -1 && no->esq->balanco > 0)
+    else if (no->balanco == -2 && no->esq->balanco == 1)
         return rebalancearEsqDir(no);
-    else if (no->balanco > 1 && no->dir->balanco > 0)
+    else if (no->balanco == 2 && no->dir->balanco == 1)
         return rebalancearDirDir(no);
-    else
+    else if(no->balanco == 2 && no->dir->balanco == -1)
         return rebalancearDirEsq(no);
+
+    return no;
 }
 
 /**
@@ -245,10 +247,12 @@ int altura(struct noBst* raiz) {
 struct noBst* remover(struct noBst* raiz, int val, int* tamanho) {
     if (raiz == NULL)
         return NULL;
-    else if (raiz->val > val)
+    else if (raiz->val > val) {
         raiz->esq = remover(raiz->esq, val, tamanho);
-    else if (raiz->val < val)
+    }
+    else if (raiz->val < val) {
         raiz->dir = remover(raiz->dir, val, tamanho);
+    }
     else {
         if (raiz->dir == NULL && raiz->esq == NULL) {
             free(raiz);
@@ -276,6 +280,11 @@ struct noBst* remover(struct noBst* raiz, int val, int* tamanho) {
             aux->val = val;
             raiz->esq = remover(raiz->esq, val, tamanho);
         }
+    }
+    if (raiz != NULL) {
+        atualizar(raiz);
+        if ((raiz)->balanco == 2 || (raiz)->balanco == -2)
+            (raiz) = balancear(raiz);
     }
     return raiz;
 }
